@@ -1,0 +1,6 @@
+# Default production profile.
+# Keep Odoo core packages on Noble/Odoo-supported versions via constraints.
+# Intentionally DO NOT install/upgrade lxml-html-clean from PyPI here.
+# The Ubuntu/Odoo apt stack remains authoritative for lxml-html-clean.
+
+weasyprint==70.0

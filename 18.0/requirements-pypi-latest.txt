@@ -1,0 +1,12 @@
+# Latest-compatible profile for selected NON-Odoo-core packages.
+# Odoo core dependencies remain protected by odoo18-py312.constraints.
+#
+# IMPORTANT: lxml-html-clean is intentionally excluded. Version 0.4.5 requires
+# lxml>=6.1.1, conflicting with Odoo 18/Noble's lxml==5.2.1. Keep the distro
+# python3-lxml-html-clean package until Odoo officially moves its lxml baseline.
+
+weasyprint==70.0
+pandas==3.0.6
+aiohttp==3.14.3
+phonenumbers==9.0.39
+watchdog==6.0.0

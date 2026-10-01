@@ -1,0 +1,12 @@
+# Latest-compatible profile for selected NON-Odoo-core packages.
+# Odoo core dependencies remain protected by the version-specific Py3.12 constraints.
+#
+# IMPORTANT: lxml-html-clean is intentionally excluded from this overlay.
+# Keep the distro/Odoo package so PyPI cannot force an lxml upgrade beyond
+# Odoo's Ubuntu Noble baseline.
+
+weasyprint==70.0
+pandas==3.0.6
+aiohttp==3.14.3
+phonenumbers==9.0.39
+watchdog==6.0.0

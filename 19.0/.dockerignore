@@ -1,0 +1,11 @@
+.git
+.gitignore
+*.zip
+__pycache__/
+*.pyc
+requirements-pypi-*.lock.txt
+
+# Do not send an unpacked Odoo source tree from Windows.
+# Keep only the single Enterprise tar.gz in the build context.
+odoo-19.0+e.20260505/
+odoo_19.0+e.20260505/

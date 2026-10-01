@@ -1,0 +1,7 @@
+# Default production profile.
+# Keep Odoo core packages on Noble/Odoo-supported versions via constraints.
+# Intentionally DO NOT install/upgrade lxml-html-clean from PyPI here:
+# lxml-html-clean 0.4.5 requires lxml>=6.1.1, while Odoo 18/Noble pins lxml==5.2.1.
+# The Ubuntu/Odoo apt stack supplies python3-lxml-html-clean instead.
+
+weasyprint==70.0
