@@ -1,3 +1,4 @@
+
 FROM ubuntu:noble
 LABEL maintainer="Odoo S.A. <info@odoo.com>"
 
@@ -12,14 +13,15 @@ ARG TARGETARCH
 # Install some deps, lessc and less-plugin-clean-css, and wkhtmltopdf
 
 RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive \
     apt-get install -y --no-install-recommends \
         ca-certificates \
         curl \
         dirmngr \
-        fonts-noto-cjk \
         gnupg \
         libssl-dev \
         node-less \
+        libwebp-dev \
         python3-magic \
         python3-num2words \
         python3-odf \
@@ -35,7 +37,14 @@ RUN apt-get update && \
         python3-watchdog \
         python3-xlrd \
         python3-xlwt \
-        xz-utils && \
+        python3-inotify \
+        python3-xlsxwriter \
+        python3-aiohttp \
+        python3-pil \
+        python3-cups \
+        cups-client \
+        xz-utils \
+        python3-pandas && \
     if [ -z "${TARGETARCH}" ]; then \
         TARGETARCH="$(dpkg --print-architecture)"; \
     fi; \
@@ -50,6 +59,11 @@ RUN apt-get update && \
     && apt-get install -y --no-install-recommends ./wkhtmltox.deb \
     && rm -rf /var/lib/apt/lists/* wkhtmltox.deb
 
+# Install LxgwNeoXiHei font
+RUN mkdir -p /usr/share/fonts/truetype/LXGWNeoXiHei && \
+    curl -L https://github.com/lxgw/LxgwNeoXiHei/releases/download/v1.211/LXGWNeoXiHei.ttf -o /usr/share/fonts/truetype/LXGWNeoXiHei/LXGWNeoXiHei.ttf && \
+    fc-cache -fv
+    
 # install latest postgresql-client
 RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ noble-pgdg main' > /etc/apt/sources.list.d/pgdg.list \
     && GNUPGHOME="$(mktemp -d)" \
@@ -72,11 +86,10 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Odoo
-ENV ODOO_VERSION=18.0
-ARG ODOO_RELEASE=20260926
-ARG ODOO_SHA=b6a268db3fca5ce831a35070dd3c4bfc6a575b85
+ENV ODOO_VERSION 18.0
+ARG ODOO_RELEASE=20260811
+# ARG ODOO_SHA=f1b567f442ff645793235cdfaba5be9204ee8b5
 RUN curl -o odoo.deb -sSL http://nightly.odoo.com/${ODOO_VERSION}/nightly/deb/odoo_${ODOO_VERSION}.${ODOO_RELEASE}_all.deb \
-    && echo "${ODOO_SHA} odoo.deb" | sha1sum -c - \
     && apt-get update \
     && apt-get -y install --no-install-recommends ./odoo.deb \
     && rm -rf /var/lib/apt/lists/* odoo.deb
@@ -84,6 +97,19 @@ RUN curl -o odoo.deb -sSL http://nightly.odoo.com/${ODOO_VERSION}/nightly/deb/od
 # Copy entrypoint script and Odoo configuration file
 COPY ./entrypoint.sh /
 COPY ./odoo.conf /etc/odoo/
+
+RUN chmod +x /entrypoint.sh /usr/local/bin/wait-for-psql.py && \
+    chown odoo:odoo /etc/odoo/odoo.conf && \
+    mkdir -p \
+        /var/lib/odoo/sessions \
+        /var/lib/odoo/addons/18.0 \
+        /mnt/extra-addons \
+        /mnt/enterprise && \
+    chown -R odoo:odoo \
+        /var/lib/odoo \
+        /mnt/extra-addons \
+        /mnt/enterprise && \
+    chmod 700 /var/lib/odoo/sessions
 
 # Set permissions and Mount /var/lib/odoo to allow restoring filestore and /mnt/extra-addons for users addons
 RUN chown odoo /etc/odoo/odoo.conf \
@@ -98,6 +124,12 @@ EXPOSE 8069 8071 8072
 ENV ODOO_RC=/etc/odoo/odoo.conf
 
 COPY wait-for-psql.py /usr/local/bin/wait-for-psql.py
+RUN python3 - <<'PY'
+import cups
+
+print("PyCUPS module:", cups.__file__)
+print("Connection class:", cups.Connection)
+PY
 
 # Set default user when running the container
 USER odoo
