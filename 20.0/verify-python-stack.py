@@ -24,17 +24,21 @@ import lxml.etree  # noqa: E402
 from weasyprint import HTML  # noqa: E402
 
 odoo_root = Path("/usr/lib/python3/dist-packages/odoo").resolve()
-odoo_file = Path(odoo.__file__).resolve()
+odoo_path = Path(odoo.release.__file__).resolve().parent
 release = str(getattr(odoo.release, "version", "unknown"))
 
-print("Odoo module:", odoo_file)
+print("Odoo namespace paths:", list(odoo.__path__))
+print("Odoo release module:", odoo.release.__file__)
 print("Odoo release:", release)
 print("WeasyPrint:", weasyprint.__version__, weasyprint.__file__)
 print("lxml runtime:", ".".join(map(str, lxml.etree.LXML_VERSION)))
 print("lxml_html_clean module:", lxml_html_clean.__file__)
 
-if odoo_file != odoo_root / "__init__.py":
-    raise SystemExit(f"Odoo is not loaded from the in-place replacement path: {odoo_file}")
+if odoo_path != odoo_root:
+    raise SystemExit(f"Odoo is not loaded from the in-place replacement path: {odoo_path}")
+
+if not (odoo_root / "init.py").is_file():
+    raise SystemExit("Odoo 19+/20 namespace initialization module init.py is missing")
 
 if expected_odoo and not release.startswith(expected_odoo):
     raise SystemExit(f"Expected Odoo {expected_odoo}, loaded release {release}")

@@ -88,3 +88,13 @@ Odoo core dependencies are protected by the version-specific constraints files.
 ## Important dependency difference
 
 For Python 3.12/Noble, Odoo 20 adds `h11==0.16.0` to its Community requirements. Odoo 20 no longer lists the Odoo 19 `pytz` and `xlwt` requirements. The two generated constraints files reflect those branch-specific declarations.
+
+## Odoo 19/20 namespace package compatibility
+
+Odoo 19.0 and 20.0 no longer provide `odoo/__init__.py`; the top-level `odoo`
+package is a PEP 420 namespace package and the initialization module is
+`odoo/init.py`. Therefore `odoo.__file__` is expected to be `None`.
+
+Build-time path validation must use `odoo.release.__file__` (or `odoo.__path__`)
+instead of `odoo.__file__`. Enterprise archive validation likewise checks
+`odoo/init.py`, not `odoo/__init__.py`.

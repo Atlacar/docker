@@ -128,7 +128,7 @@ RUN --mount=type=bind,source=odoo-20.0+e.20260930.tar.gz,target=/tmp/odoo-enterp
     fi; \
     apt-get update; \
     apt-get -y install --no-install-recommends /tmp/odoo.deb; \
-    COMMUNITY_ODOO_DIR="$(python3 -c 'import os, odoo; print(os.path.dirname(os.path.realpath(odoo.__file__)))')"; \
+    COMMUNITY_ODOO_DIR="$(python3 -c 'from pathlib import Path; import odoo.release; print(Path(odoo.release.__file__).resolve().parent)')"; \
     echo "Community bootstrap Odoo path: ${COMMUNITY_ODOO_DIR}"; \
     test "${COMMUNITY_ODOO_DIR}" = "/usr/lib/python3/dist-packages/odoo"; \
     getent passwd odoo >/dev/null; \
@@ -136,7 +136,7 @@ RUN --mount=type=bind,source=odoo-20.0+e.20260930.tar.gz,target=/tmp/odoo-enterp
     test -x /usr/bin/odoo; \
     mkdir -p /tmp/odoo-enterprise-src; \
     tar --extract --gzip --file=/tmp/odoo-enterprise.tar.gz --strip-components=1 --directory=/tmp/odoo-enterprise-src; \
-    test -f /tmp/odoo-enterprise-src/odoo/__init__.py; \
+    test -f /tmp/odoo-enterprise-src/odoo/init.py; \
     test -f /tmp/odoo-enterprise-src/odoo/release.py; \
     test -f /tmp/odoo-enterprise-src/requirements.txt; \
     test -d /tmp/odoo-enterprise-src/odoo/addons; \
@@ -157,7 +157,7 @@ RUN --mount=type=bind,source=odoo-20.0+e.20260930.tar.gz,target=/tmp/odoo-enterp
     chown -R root:root \
       /usr/lib/python3/dist-packages/odoo \
       /usr/lib/python3/dist-packages/odoo.egg-info 2>/dev/null || true; \
-    python3 -c 'from pathlib import Path; import odoo, odoo.release; root=Path("/usr/lib/python3/dist-packages/odoo").resolve(); loaded=Path(odoo.__file__).resolve(); print("Odoo loaded from:", loaded); print("Odoo release:", getattr(odoo.release, "version", "unknown")); assert loaded == root / "__init__.py", f"Unexpected Odoo import path: {loaded}"; markers=(root/"addons"/"web_enterprise"/"__manifest__.py", root/"addons"/"account_accountant"/"__manifest__.py"); assert any(p.is_file() for p in markers), "Enterprise addon marker missing after replacement"; print("Enterprise Odoo in-place replacement: OK")'; \
+    python3 -c 'from pathlib import Path; import odoo, odoo.release; root=Path("/usr/lib/python3/dist-packages/odoo").resolve(); loaded=Path(odoo.release.__file__).resolve().parent; print("Odoo namespace paths:", list(odoo.__path__)); print("Odoo release module:", odoo.release.__file__); print("Odoo release:", getattr(odoo.release, "version", "unknown")); assert loaded == root, f"Unexpected Odoo import path: {loaded}"; assert (root/"init.py").is_file(), "Odoo 19+/20 namespace initialization module missing"; markers=(root/"addons"/"web_enterprise"/"__manifest__.py", root/"addons"/"account_accountant"/"__manifest__.py"); assert any(p.is_file() for p in markers), "Enterprise addon marker missing after replacement"; print("Enterprise Odoo in-place replacement: OK")'; \
     apt-mark hold odoo; \
     rm -rf /tmp/odoo.deb /tmp/odoo-enterprise-src /var/lib/apt/lists/*
 
