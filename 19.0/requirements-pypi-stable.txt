@@ -3,4 +3,4 @@
 # Intentionally DO NOT install/upgrade lxml-html-clean from PyPI here.
 # The Ubuntu/Odoo apt stack remains authoritative for lxml-html-clean.
 
-weasyprint==70.0
+authlib>=1.6.12,<1.7.0

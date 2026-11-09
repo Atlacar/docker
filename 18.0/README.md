@@ -1,6 +1,8 @@
 # Odoo 18 Enterprise in-place replacement V3
 
-这个版本基于 V2（Ubuntu Noble + `/opt/odoo-venv` + WeasyPrint 70）修改。
+这个版本基于 V2（Ubuntu Noble + `/opt/odoo-venv`）修改。
+
+stable 和 latest profile 均安装 `authlib>=1.6.12,<1.7.0`。
 
 ## 目标
 
@@ -105,7 +107,7 @@ RUN --mount=type=bind,...
 - Enterprise archive 缺少 `odoo/__init__.py`；
 - 未发现 `web_enterprise` 或 `account_accountant`；
 - 最终 `import odoo` 不是从原位替换目录加载；
-- WeasyPrint 70 / PyCUPS / PDF smoke test 失败。
+- Authlib / PyCUPS 导入检查失败。
 
 ## 注意
 

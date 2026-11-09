@@ -15,17 +15,16 @@ print("Python version:", sys.version.replace("\n", " "))
 
 import odoo  # noqa: E402
 import cups  # noqa: E402
-import weasyprint  # noqa: E402
+import authlib  # noqa: E402
 import lxml_html_clean  # noqa: E402
 import lxml.etree  # noqa: E402
-from weasyprint import HTML  # noqa: E402
 
 odoo_root = Path("/usr/lib/python3/dist-packages/odoo").resolve()
 odoo_file = Path(odoo.__file__).resolve()
 
 print("Odoo module:", odoo_file)
 print("PyCUPS module:", cups.__file__)
-print("WeasyPrint:", weasyprint.__version__, weasyprint.__file__)
+print("Authlib:", authlib.__version__, authlib.__file__)
 print("lxml runtime:", ".".join(map(str, lxml.etree.LXML_VERSION)))
 print("lxml_html_clean module:", lxml_html_clean.__file__)
 
@@ -58,27 +57,3 @@ for package in (
     "lxml-html-clean",
 ):
     print(f"{package}: {version(package)}")
-
-if weasyprint.__version__ != "70.0":
-    raise SystemExit(f"Expected WeasyPrint 70.0, got {weasyprint.__version__}")
-
-pdf_path = Path("/tmp/weasyprint-smoke-test.pdf")
-HTML(
-    string="""<!doctype html>
-<html lang="zh-CN">
-<meta charset="utf-8">
-<style>
-  body { font-family: sans-serif; }
-  h1 { margin-bottom: 0.4em; }
-</style>
-<body>
-  <h1>WeasyPrint 70 smoke test</h1>
-  <p>中文测试 / Español / Odoo 18 Enterprise / Ubuntu Noble</p>
-</body>
-</html>"""
-).write_pdf(pdf_path)
-
-if not pdf_path.exists() or pdf_path.stat().st_size < 1000:
-    raise SystemExit("WeasyPrint smoke-test PDF was not generated correctly")
-
-print("WeasyPrint PDF smoke test: OK", pdf_path.stat().st_size, "bytes")

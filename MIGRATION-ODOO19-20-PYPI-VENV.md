@@ -1,4 +1,4 @@
-# Odoo 19/20 PyPI + WeasyPrint + venv wrapper migration
+# Odoo 19/20 PyPI + venv wrapper migration
 
 This migration ports the enhanced Odoo 18 image pattern to Odoo 19.0 and 20.0 on Ubuntu 24.04 Noble.
 
@@ -15,10 +15,10 @@ The archives are bind-mounted only for the Enterprise source replacement step, s
 - `/opt/odoo-venv` created with `--system-site-packages`.
 - `PATH=/opt/odoo-venv/bin:$PATH` plus an `odoo` wrapper that runs `/usr/bin/odoo` with the venv Python interpreter.
 - `stable` and `latest` PyPI overlay profiles.
-- WeasyPrint 70.0 from PyPI, with Pango/Harfbuzz/font system libraries from Noble.
+- Authlib (`>=1.6.12,<1.7.0`) from PyPI.
 - Odoo core dependency guardrails derived from Odoo Community `19.0/requirements.txt` and `20.0/requirements.txt` for Python 3.12/Noble.
 - `lxml-html-clean` remains distro/Odoo managed rather than upgraded by the PyPI overlay.
-- Build-time smoke test validates Enterprise source, Odoo major series, lxml source, and an actual WeasyPrint PDF render.
+- Build-time smoke test validates Enterprise source, Odoo major series, lxml source, and Authlib imports.
 - LF normalization in source plus a Dockerfile `sed` safety net for Windows checkouts.
 
 ## Build Odoo 19
@@ -74,7 +74,7 @@ docker build \
 
 ## PyPI profiles
 
-`stable` installs only WeasyPrint 70.0 on top of the distro/Odoo Python stack.
+`stable` installs Authlib (`>=1.6.12,<1.7.0`) on top of the distro/Odoo Python stack.
 
 `latest` additionally overlays the same selected non-core packages as the enhanced 18.0 image:
 

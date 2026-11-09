@@ -19,7 +19,6 @@ ARG TARGETARCH
 ARG PYPI_PROFILE=stable
 
 # System packages remain the Odoo/Noble baseline.
-# WeasyPrint itself is intentionally NOT installed from apt; it is provided by PyPI in the venv.
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive \
     apt-get install -y --no-install-recommends \
@@ -56,10 +55,7 @@ RUN apt-get update && \
         python3-pandas \
         python3-openpyxl \
         python3-lxml-html-clean \
-        fontconfig \
-        libpango-1.0-0 \
-        libpangoft2-1.0-0 \
-        libharfbuzz0b && \
+        fontconfig && \
     if [ -z "${TARGETARCH}" ]; then \
         TARGETARCH="$(dpkg --print-architecture)"; \
     fi; \
@@ -196,7 +192,7 @@ RUN --mount=type=bind,source=odoo_18.0+e.20260811.tar.gz,target=/tmp/odoo-enterp
       /var/lib/apt/lists/*
 
 # PyPI overlay: keep Odoo's Noble/Python 3.12 package versions constrained,
-# but allow selected non-core packages and WeasyPrint to come from PyPI.
+# but allow selected non-core packages including Authlib to come from PyPI.
 # Do NOT pip-upgrade lxml-html-clean: 0.4.5 requires lxml>=6.1.1, while
 # Odoo 18/Noble pins lxml==5.2.1. The apt package remains authoritative.
 COPY ./odoo18-py312.constraints /opt/odoo18-py312.constraints
@@ -228,8 +224,7 @@ RUN cat > "${VIRTUAL_ENV}/bin/odoo" <<'EOF_WRAPPER' && chmod +x "${VIRTUAL_ENV}/
 exec /opt/odoo-venv/bin/python3 /usr/bin/odoo "$@"
 EOF_WRAPPER
 
-# Build-time smoke test: verify Enterprise Odoo source, PyCUPS and a real
-# WeasyPrint PDF render.
+# Build-time smoke test: verify Enterprise Odoo source, PyCUPS and Authlib imports.
 RUN "${VIRTUAL_ENV}/bin/python" /opt/verify-python-stack.py
 
 # Copy entrypoint script and Odoo configuration file

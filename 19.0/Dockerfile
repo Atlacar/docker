@@ -18,8 +18,7 @@ ENV LANG=en_US.UTF-8 \
 ARG TARGETARCH
 ARG PYPI_PROFILE=stable
 
-# Noble/Odoo baseline plus the native libraries needed by WeasyPrint.
-# WeasyPrint itself is intentionally installed from PyPI inside the venv.
+# System packages remain the Odoo/Noble baseline.
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive \
     apt-get install -y --no-install-recommends \
@@ -56,10 +55,7 @@ RUN apt-get update && \
         python3-pandas \
         python3-openpyxl \
         python3-lxml-html-clean \
-        fontconfig \
-        libpango-1.0-0 \
-        libpangoft2-1.0-0 \
-        libharfbuzz0b && \
+        fontconfig && \
     if [ -z "${TARGETARCH}" ]; then \
         TARGETARCH="$(dpkg --print-architecture)"; \
     fi; \
@@ -161,7 +157,7 @@ RUN --mount=type=bind,source=odoo_19.0+e.20260505.tar.gz,target=/tmp/odoo-enterp
     rm -rf /tmp/odoo.deb /tmp/odoo-enterprise-src /var/lib/apt/lists/*
 
 # PyPI overlay: Odoo core packages are guarded by the official Noble/Python 3.12
-# constraints. Selected non-core packages and WeasyPrint are provided by PyPI.
+# constraints. Selected non-core packages including Authlib are provided by PyPI.
 COPY ./odoo19-py312.constraints /opt/odoo19-py312.constraints
 COPY ./requirements-pypi-stable.txt /opt/requirements-pypi-stable.txt
 COPY ./requirements-pypi-latest.txt /opt/requirements-pypi-latest.txt
@@ -190,7 +186,7 @@ RUN cat > "${VIRTUAL_ENV}/bin/odoo" <<'EOF_WRAPPER' && chmod +x "${VIRTUAL_ENV}/
 exec /opt/odoo-venv/bin/python3 /usr/bin/odoo "$@"
 EOF_WRAPPER
 
-# Build-time smoke test: Enterprise source + exact Odoo series + real PDF render.
+# Build-time smoke test: Enterprise source + exact Odoo series + Authlib import.
 RUN "${VIRTUAL_ENV}/bin/python" /opt/verify-python-stack.py
 
 COPY ./entrypoint.sh /
